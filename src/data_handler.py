@@ -33,7 +33,7 @@ class Case:
     def summarize_for_llm(self) -> str:        
         return f"Patient Narrative: {self.patient_narrative}\n" \
                f"Patient Question: {self.patient_question}\n" \
-               f"{' '.join(str(s.text) for s in self.sentences)}\n" \
+               f"{'\n'.join(f"{str(s.sentence_id)}: {str(s.text)}" for s in self.sentences)}\n" \
                f"The list of relevant sentences:"
 
 
