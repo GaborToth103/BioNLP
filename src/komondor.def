@@ -1,0 +1,20 @@
+BootStrap: docker
+From: ubuntu:latest
+
+%post
+    apt -y update                                               # Ubuntu frissítése
+    apt -y install python3 python3-venv                         # Python letöltése 
+
+    python3 -m venv /opt/venv                                   # Python virtuális környezet létrehozása
+    . /opt/venv/bin/activate                                    # Python virtuális környezet aktiválása
+
+    pip install --upgrade pip                                   # Pip frissítése
+    pip install torch transformers accelerate huggingface_hub   # Szükséges Python csomagok letöltése
+
+%environment
+    export PATH=/opt/venv/bin:$PATH                             # A virtuális környezetre állítjuk az alapértelmezett útvonalat
+    export HF_HOME=/scratch/c_qa_gen/huggingface_models         # A közös HF Cache, ide töltődnek le a nagy modellek
+    export DATA=/scratch/c_qa_gen/bionlp                        # A közös tárhely amit használni szeretnénk környezeti változóként (pythonban: os.getenv("DATA"))
+
+%runscript
+    /bin/bash                                                   # Induláskor elindítja a konzolt
