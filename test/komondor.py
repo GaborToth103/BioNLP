@@ -3,6 +3,7 @@
 from datetime import datetime
 from transformers import AutoModelForCausalLM, AutoTokenizer, pipeline
 import os
+import torch
 
 model_name = "aaditya/OpenBioLLM-Llama3-8B"
 file_path = 'data/output/example.txt'
@@ -30,4 +31,9 @@ with open(file_path, 'w') as file:
     file.write(generated_text)
     file.write(f"\nThis should be placed into the {file_path} at {current_date}\n")
 print(f"\nThis should be placed into the out.txt at {current_date}\n")
+
+device = torch.device("cuda:0")  # Első GPU
+print(f"Allocated memory: {torch.cuda.memory_allocated(device) / 1e6} MB")
+print(f"Reserved memory: {torch.cuda.memory_reserved(device) / 1e6} MB")
+
 raise Exception(f"\nThis should be placed into the error.txt at {current_date}\n")

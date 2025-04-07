@@ -2,7 +2,6 @@ from model_loader import load_model, answer
 from data_handler import *
 from scoring import score_function
 
-
 if __name__ == "__main__":
     scores = []
     data = DataHandler("data/dev/archehr-qa.xml", "data/dev/archehr-qa_key.json")
