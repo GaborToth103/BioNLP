@@ -1,10 +1,10 @@
 import torch
 import gc
 from transformers import pipeline
-import time
 from huggingface_hub import login
 from dotenv import load_dotenv
 import os
+
 load_dotenv()
 HF_TOKEN = os.getenv("HF_TOKEN")
 login(HF_TOKEN)
@@ -19,22 +19,35 @@ MODEL_IDS = [
 
 # 8b models
 MODEL_IDS = [
-    "aaditya/Llama3-OpenBioLLM-8B",
     "dmis-lab/llama-3-meerkat-8b-v1.0",
     "m42-health/Llama3-Med42-8B",
+    "aaditya/Llama3-OpenBioLLM-8B",
 ]
 
+# Small example
+MODEL_IDS = [
+    "microsoft/Phi-4-mini-instruct",
+]
 
 def load_model(model_id: str):
     """Loads the specified model and returns a text generation pipeline."""
+    with torch.no_grad():
+        torch.cuda.empty_cache()
+    gc.collect()
     pipe = pipeline(
         "text-generation",
         model=model_id,
         torch_dtype=torch.bfloat16,
         device_map="auto",
-        use_auth_token=HF_TOKEN
     )
     return pipe
+
+def answer_batch(pipe, user_prompts: list, system_prompt: str = "You are a pirate chatbot who always responds in pirate speak!") -> list:
+    """Generates responses for a batch of user prompts."""
+    messages = [{"role": "system", "content": system_prompt, "role": "user", "content": prompt} for prompt in user_prompts]
+    batch_messages = [f"{message['role']}:{message['content']}" for message in messages]  # Combine role and content
+    responses = pipe(batch_messages, max_new_tokens=32)
+    return [response[0]["generated_text"] for response in responses]
 
 def answer(pipe, user_prompt: str, system_prompt: str = "You are a pirate chatbot who always responds in pirate speak!") -> str:
     """Generates a response from the loaded model."""
@@ -44,7 +57,7 @@ def answer(pipe, user_prompt: str, system_prompt: str = "You are a pirate chatbo
     ]
     response = pipe(
         messages,
-        max_new_tokens=16,
+        max_new_tokens=32,
     )[0]["generated_text"][-1]['content']
     return response
 
@@ -60,7 +73,6 @@ def switch_models(user_prompt: str):
         del pipe
         torch.cuda.empty_cache()
         gc.collect()
-        time.sleep(10)
     return responses
 
 from collections import Counter
@@ -73,7 +85,6 @@ def voting_function(responses: list[list[int]]) -> list[int]:
     return [num for num, count in number_counts.items() if count >= 2]
 
 if __name__ == "__main__":
-    user_input = "Who are you?"
-    responses = switch_models(user_input)
-    for model, response in responses.items():
-        print(f"\nModel: {model}\nResponse: {response}\n")
+    pipe = load_model(MODEL_IDS[0])
+    result = answer_batch(pipe, ["hello", "there", "chatgpt"])
+    print(result)
