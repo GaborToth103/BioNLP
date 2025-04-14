@@ -9,7 +9,8 @@ From: ubuntu:latest
     . /opt/venv/bin/activate                                    # Python virtuális környezet aktiválása
 
     pip install --upgrade pip                                   # Pip frissítése
-    pip install -r requirements.txt                             # Szükséges Python csomagok letöltése
+    # pip install -r requirements.txt
+    pip install torch transformers accelerate huggingface_hub python-dotenv bitsandbytes dotenv scikit-learn numba datasets
 
 %environment
     export PATH=/opt/venv/bin:$PATH                             # A virtuális környezetre állítjuk az alapértelmezett útvonalat
