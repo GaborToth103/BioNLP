@@ -18,24 +18,26 @@ class Sentence:
         return f"Sentence {self.sentence_id} ({self.relevance.value}): {self.text}"
 
 class Case:
-    def __init__(self, case_id, patient_narrative, patient_question, sentences):
+    def __init__(self, case_id, patient_narrative, patient_question, clinician_question, sentences):
         self.case_id = case_id
         self.patient_narrative = patient_narrative
         self.patient_question = patient_question
+        self.clinician_question = clinician_question
         self.sentences = sentences
 
     def __str__(self) -> str:
         return f"Case {self.case_id}:\n" \
                f"Patient Narrative: {self.patient_narrative}\n" \
                f"Patient Question: {self.patient_question}\n" \
+               f"Clinician Question: {self.clinician_question}\n" \
                f"{'\n'.join(str(s) for s in self.sentences)}\n"
     
     def summarize_for_llm(self) -> str:        
         return f"Patient Narrative: {self.patient_narrative}\n" \
                f"Patient Question: {self.patient_question}\n" \
+               f"Clinician Question: {self.clinician_question}\n" \
                f"{'\n'.join(f"{str(s.sentence_id)}: {str(s.text)}" for s in self.sentences)}\n" \
                f"The list of relevant sentences:"
-
 
 class DataHandler:
     def __init__(self, xml_path: str, json_path: str):
@@ -54,6 +56,7 @@ class DataHandler:
             case_id = case.get("id")
             patient_narrative = case.find("patient_narrative").text.strip()
             patient_question = case.find("patient_question/phrase").text.strip()
+            clinician_question = case.find("clinician_question").text.strip()
 
             sentences = []
             for sentence in case.findall("note_excerpt_sentences/sentence"):
@@ -61,7 +64,7 @@ class DataHandler:
                 text = sentence.text.strip()
                 sentences.append(Sentence(sentence_id, self.clean_text(text)))
 
-            cases[case_id] = Case(case_id, patient_narrative, patient_question, sentences)
+            cases[case_id] = Case(case_id, patient_narrative, patient_question, clinician_question, sentences)
 
         return cases
 

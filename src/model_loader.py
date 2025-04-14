@@ -49,15 +49,16 @@ def answer_batch(pipe, user_prompts: list, system_prompt: str = "You are a pirat
     responses = pipe(batch_messages, max_new_tokens=32)
     return [response[0]["generated_text"] for response in responses]
 
-def answer(pipe, user_prompt: str, system_prompt: str = "You are a pirate chatbot who always responds in pirate speak!") -> str:
+def answer(pipe, user_prompt: str, history: str = "", system_prompt: str = "You are a pirate chatbot who always responds in pirate speak!") -> str:
     """Generates a response from the loaded model."""
     messages = [
         {"role": "system", "content": system_prompt},
+        {"role": "system", "content": f"History\n{history}"},
         {"role": "user", "content": user_prompt},
     ]
     response = pipe(
         messages,
-        max_new_tokens=32,
+        max_new_tokens=512,
     )[0]["generated_text"][-1]['content']
     return response
 
