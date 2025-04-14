@@ -3,11 +3,14 @@ from scoring import *
 from huggingface_hub import login
 from dotenv import load_dotenv
 import os
+import re
+from statistics import mean
+from transformers import pipeline
+import torch
 
 load_dotenv()
 HF_TOKEN = os.getenv("HF_TOKEN")
 login(HF_TOKEN)
-
 
 def construct_prompt_refined_from_case(case: Case):
     sentences = [f"**{int(s.sentence_id)+1}:** {s.text}" for s in case.sentences]
@@ -85,15 +88,12 @@ Your Answer:
         'content': user_prompt
     }
 
-import re
-
 def extract_sentence_ids(answer: str) -> list[int]:
     matches = re.findall(r'\(([^)]+)\)', answer)
     ids = []
     for match in matches:
         ids.extend(map(int, re.findall(r'\d+', match)))
     return ids
-
 
 def convert_indices_to_labels(predicted_ids: list[int], length: int, 
                               essential_label='essential', 
@@ -104,29 +104,30 @@ def convert_indices_to_labels(predicted_ids: list[int], length: int,
             y_pred[idx] = essential_label
     return y_pred
 
-from statistics import mean
-
-from transformers import pipeline
-import torch
-
-model_id = "aaditya/Llama3-OpenBioLLM-70B" 
-
-pipe = pipeline(
-    "text-generation",
-    model=model_id,
-    torch_dtype=torch.bfloat16,
-    device_map="auto",
-)
-
 if __name__ == "__main__":
+    ollama_use = True
+    
+    if not ollama_use:
+        pipe = pipeline(
+            "text-generation",
+            model="aaditya/Llama3-OpenBioLLM-70B",
+            torch_dtype=torch.bfloat16,
+            device_map="auto",
+        )
+    else:
+        from ollama import chat
     data = DataHandler("data/dev/archehr-qa.xml", "data/dev/archehr-qa_key.json")
+
     f1s = []
     precisions = []
     recalls = []
     for case in data.cases.values():
         prompt = construct_prompt_refined_from_case(case)
         messages = [prompt[0], prompt[1]]
-        answer = pipe(messages, max_new_tokens=512)[0]["generated_text"][-1]['content']
+        if not ollama_use:
+            answer = pipe(messages, max_new_tokens=512)[0]["generated_text"][-1]['content']
+        else:
+            answer = chat(model='gemma3', messages=[prompt[0], prompt[1]])["message"]["content"]            
         predicted_sentence_ids = extract_sentence_ids(answer)
         y_true = [s.relevance.value for s in case.sentences]  # assuming Relevance enum values are like 'essential'
         y_pred = convert_indices_to_labels(predicted_sentence_ids, len(y_true))
