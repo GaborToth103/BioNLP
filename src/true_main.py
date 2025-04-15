@@ -105,12 +105,13 @@ def convert_indices_to_labels(predicted_ids: list[int], length: int,
     return y_pred
 
 if __name__ == "__main__":
-    ollama_use = True
+    ollama_use = False
+    instruct = True
     
     if not ollama_use:
         pipe = pipeline(
             "text-generation",
-            model="aaditya/Llama3-OpenBioLLM-70B",
+            model="microsoft/Phi-4-mini-instruct",
             torch_dtype=torch.bfloat16,
             device_map="auto",
         )
@@ -125,7 +126,10 @@ if __name__ == "__main__":
         prompt = construct_prompt_refined_from_case(case)
         messages = [prompt[0], prompt[1]]
         if not ollama_use:
-            answer = pipe(messages, max_new_tokens=512)[0]["generated_text"][-1]['content']
+            if instruct:
+                answer = pipe(messages, max_new_tokens=512)[0]["generated_text"][-1]['content']
+            else:
+                answer = pipe(str(messages) + "\nYour answer: ", max_new_tokens=512)[0]["generated_text"]
         else:
             answer = chat(model='gemma3', messages=[prompt[0], prompt[1]])["message"]["content"]            
         predicted_sentence_ids = extract_sentence_ids(answer)
