@@ -10,7 +10,7 @@ From: ubuntu:latest
 
     pip install --upgrade pip                                   # Pip frissítése
     # pip install -r requirements.txt
-    pip install torch transformers accelerate huggingface_hub python-dotenv bitsandbytes dotenv scikit-learn numba datasets
+    pip install torch transformers accelerate huggingface_hub python-dotenv bitsandbytes dotenv scikit-learn numba datasets matplotlib
 
 %environment
     export PATH=/opt/venv/bin:$PATH                             # A virtuális környezetre állítjuk az alapértelmezett útvonalat

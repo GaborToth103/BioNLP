@@ -1,9 +1,9 @@
 #!/bin/sh
-#SBATCH --job-name=BioNLP
+#SBATCH --job-name=openbio-8b
 #SBATCH --partition=gpu
 #SBATCH --mem-per-cpu=128G
 #SBATCH --gres=gpu:4
-#SBATCH --time=00:20:00
+#SBATCH --time=02:00:00
 #SBATCH --output=data/output/out.txt
 #SBATCH --error=data/output/error.txt
 #SBATCH --mail-type=ALL
