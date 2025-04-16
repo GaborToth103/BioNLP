@@ -70,10 +70,7 @@ Instructions:
 1. First, carefully identify which sentences are ESSENTIAL to answering the clinician's rephrased question. Focus on sentences that directly explain the medical reasoning, procedures performed, and clinical findings.
 2. When writing your answer, ONLY include information from these essential sentences. Each statement in your answer MUST be supported by at least one citation.
 3. For each statement in your answer, cite the specific sentence number(s) that support it using parentheses, e.g., "The procedure was successful (3, 5)."
-4. Be very precise with your citations - only cite sentences that directly support each specific claim you make.
-
-Your Answer:
-"""
+4. Be very precise with your citations - only cite sentences that directly support each specific claim you make."""
 
     return {
         'role': 'system', 
@@ -169,6 +166,7 @@ if __name__ == "__main__":
         y_true = [s.relevance.value for s in case.sentences]  # assuming Relevance enum values are like 'essential'
         y_pred = convert_indices_to_labels(predicted_sentence_ids, len(y_true))
         f1, precision, recall = f1_score(y_true, y_pred)
+        print(answer)
         print(f1, precision, recall)
         f1s.append(f1)
         precisions.append(precision)

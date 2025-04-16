@@ -1,8 +1,8 @@
 #!/bin/sh
-#SBATCH --job-name=openbio-8b
+#SBATCH --job-name=gemma-print
 #SBATCH --partition=gpu
-#SBATCH --mem-per-cpu=128G
-#SBATCH --gres=gpu:4
+#SBATCH --mem-per-cpu=16G
+#SBATCH --gres=gpu:2
 #SBATCH --time=02:00:00
 #SBATCH --output=data/output/out.txt
 #SBATCH --error=data/output/error.txt
@@ -13,4 +13,4 @@ SIF_FILE=data/komondor.sif
 DATA_PATH=/scratch/c_qa_gen
 
 module load singularity
-singularity exec --nv -B $DATA_PATH $SIF_FILE python src/true_main.py
+singularity exec --nv -B $DATA_PATH $SIF_FILE python src/true_main.py --model_name google/gemma-3-27b-it
